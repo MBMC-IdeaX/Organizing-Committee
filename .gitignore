@@ -1,0 +1,35 @@
+# Environment & Secrets
+.env
+.env.*
+*.env
+*.local
+*.secret
+*.pem
+*.key
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+
+# Logs & Temp
+*.log
+logs/
+temp/
+tmp/
+*.tmp
+test_out.txt
+
+# Build outputs
+**/target/
+**/build/
+**/.dart_tool/
+**/.pub/
+**/.pub-cache/
+**/coverage/
+.flutter-plugins
+.flutter-plugins-dependencies
