@@ -61,6 +61,10 @@ void main() {
   );
 
   testWidgets('TeamResultDetailsScreen renders metrics, progress bars, and scorecards', (tester) async {
+    tester.view.physicalSize = const Size(1200, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     when(() => mockResultsRepository.getTeamResult(1)).thenAnswer((_) async => testTeamResult);
 
     final teamCubit = TeamResultCubit(resultsRepository: mockResultsRepository);

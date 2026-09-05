@@ -57,6 +57,7 @@ class _ScoringScreenState extends State<ScoringScreen> {
               SnackBar(
                 content: Text(state.actionSuccessMessage!),
                 backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }
@@ -66,6 +67,7 @@ class _ScoringScreenState extends State<ScoringScreen> {
               SnackBar(
                 content: Text(state.actionErrorMessage!),
                 backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
               ),
             );
           }
@@ -132,9 +134,9 @@ class _ScoringScreenState extends State<ScoringScreen> {
             session.teamName,
             style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy),
           ),
-          const SizedBox(height: AppDimensions.space4),
+          const SizedBox(height: AppDimensions.space2),
           Text(
-            'Rubric Evaluation (Order #${session.displayOrder.toString().padLeft(2, '0')})',
+            'Evaluation Rubric (Order #${session.displayOrder.toString().padLeft(2, '0')})',
             style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppDimensions.space16),
@@ -157,6 +159,7 @@ class _ScoringScreenState extends State<ScoringScreen> {
                   child: SecondaryButton(
                     text: 'Save Draft',
                     icon: Icons.save_outlined,
+                    height: 44,
                     isLoading: state.isSaving,
                     onPressed: state.isSaving || state.isCompleting
                         ? null
@@ -168,6 +171,7 @@ class _ScoringScreenState extends State<ScoringScreen> {
                   child: PrimaryButton(
                     text: 'Mark Complete',
                     icon: Icons.check_circle_outline,
+                    height: 44,
                     isLoading: state.isCompleting,
                     onPressed: state.isSaving || state.isCompleting
                         ? null
@@ -200,6 +204,8 @@ class _ScoringScreenState extends State<ScoringScreen> {
   }
 
   Widget _buildTotalScoreBanner(int totalScore, int maxScore, bool isReadOnly) {
+    final pct = maxScore > 0 ? (totalScore / maxScore) * 100.0 : 0.0;
+
     return GlassCard(
       gradient: isReadOnly ? AppColors.successCardGradient : AppColors.heroCardGradient,
       child: Row(
@@ -209,13 +215,24 @@ class _ScoringScreenState extends State<ScoringScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isReadOnly ? 'Final Total Score' : 'Running Total Score',
+                isReadOnly ? 'Final Total Score' : 'Current Total Score',
                 style: AppTextStyles.labelLarge.copyWith(color: Colors.white70),
               ),
               const SizedBox(height: AppDimensions.space4),
-              Text(
-                '$totalScore / $maxScore Points',
-                style: AppTextStyles.headingMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '$totalScore / $maxScore',
+                    style: AppTextStyles.headingLarge.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${pct.toStringAsFixed(1)}%)',
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.softBlue, fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
             ],
           ),
@@ -268,12 +285,12 @@ class _ScoringScreenState extends State<ScoringScreen> {
                   ),
                 ),
                 StatusBadge(
-                  label: 'Max ${criterion.maxScore} pts',
+                  label: '${criterion.maxScore} pts',
                   type: BadgeType.neutral,
                 ),
               ],
             ),
-            const SizedBox(height: AppDimensions.space16),
+            const SizedBox(height: AppDimensions.space14),
 
             // Score Row with Direct Input + Steppers
             Row(
@@ -282,7 +299,7 @@ class _ScoringScreenState extends State<ScoringScreen> {
                 if (!isReadOnly)
                   Expanded(
                     child: Text(
-                      isScored ? 'Entered Score:' : 'Set Score (0 - ${criterion.maxScore}):',
+                      isScored ? 'Score (0 – ${criterion.maxScore}):' : 'Set Score (0 – ${criterion.maxScore}):',
                       style: AppTextStyles.labelLarge.copyWith(
                         color: isScored ? AppColors.primaryBlue : AppColors.textSecondary,
                       ),
@@ -374,20 +391,21 @@ class _ScoringScreenState extends State<ScoringScreen> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Complete Evaluation?',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
         ),
         content: Text(
-          'Once submitted as complete, these scores and comments become immutable and cannot be changed.',
+          'Once submitted as complete, these scores and comments cannot be changed.',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () => Navigator.pop(dialogCtx, false),
             child: const Text('Cancel'),
@@ -397,13 +415,14 @@ class _ScoringScreenState extends State<ScoringScreen> {
               backgroundColor: AppColors.primaryBlue,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
             ),
             onPressed: () => Navigator.pop(dialogCtx, true),
-            child: const Text('Mark as Complete'),
+            child: const Text('✓ Mark as Complete'),
           ),
         ],
       ),
@@ -419,6 +438,7 @@ class _ScoringScreenState extends State<ScoringScreen> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Unsaved Changes',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -427,12 +447,12 @@ class _ScoringScreenState extends State<ScoringScreen> {
           'You have unsaved score changes. Are you sure you want to leave without saving?',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () => Navigator.pop(dialogCtx, false),
             child: const Text('Stay'),
@@ -442,7 +462,8 @@ class _ScoringScreenState extends State<ScoringScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),

@@ -77,6 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         // Light Glassmorphism Login Card
                         GlassCard(
+                          padding: const EdgeInsets.all(AppDimensions.space24),
                           child: Form(
                             key: _formKey,
                             child: Column(
@@ -108,14 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                                        const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
                                         const SizedBox(width: AppDimensions.space8),
                                         Expanded(
                                           child: Text(
                                             state.message,
                                             style: AppTextStyles.bodySmall.copyWith(
                                               color: AppColors.error,
-                                              fontWeight: FontWeight.w500,
+                                              fontWeight: FontWeight.w600,
                                             ),
                                           ),
                                         ),
@@ -152,6 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 // Submit Action Button
                                 PrimaryButton(
                                   text: 'Sign In to IdeaX',
+                                  height: 46,
                                   onPressed: _onLoginPressed,
                                   isLoading: isLoading,
                                   icon: Icons.login_rounded,
@@ -164,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         // System info footer
                         Text(
-                          'IdeaX Live Judging • Powered by Deepmind Systems',
+                          'IdeaX Live Judging • Powered by Lucas Labs',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.textMuted,
                           ),

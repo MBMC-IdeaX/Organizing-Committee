@@ -91,8 +91,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Results are not ready yet'), findsOneWidget);
-    expect(find.text('Evaluation Progress'), findsOneWidget);
-    expect(find.text('4 / 6 (66.7%)'), findsOneWidget);
+    expect(find.text('Judging Progress'), findsOneWidget);
+    expect(find.text('4 / 6 Evaluations'), findsOneWidget);
+    expect(find.text('66.7%'), findsOneWidget);
     expect(find.text('Missing Ballots'), findsOneWidget);
     expect(find.text('2'), findsNWidgets(2));
 

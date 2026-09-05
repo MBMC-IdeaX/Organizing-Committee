@@ -115,7 +115,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('IdeaX Admin Console'), findsOneWidget);
-      expect(find.text('ADMIN ROLE'), findsOneWidget);
+      expect(find.text('ADMIN'), findsOneWidget);
 
       authCubit.close();
       adminDashboardCubit.close();

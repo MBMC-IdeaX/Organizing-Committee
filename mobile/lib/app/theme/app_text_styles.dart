@@ -131,3 +131,6 @@ class AppTextStyles {
     color: AppColors.textSecondary,
   );
 }
+
+/// Design system alias
+typedef GlassTypography = AppTextStyles;

@@ -8,6 +8,7 @@ import '../../../../shared/widgets/app_app_bar.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/glass_search_field.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../../../../shared/widgets/status_badge.dart';
@@ -17,6 +18,8 @@ import '../cubit/teams_cubit.dart';
 import '../cubit/teams_state.dart';
 import '../widgets/add_edit_team_dialog.dart';
 
+enum TeamFilter { all, active, inactive }
+
 class TeamsScreen extends StatefulWidget {
   const TeamsScreen({super.key});
 
@@ -25,6 +28,9 @@ class TeamsScreen extends StatefulWidget {
 }
 
 class _TeamsScreenState extends State<TeamsScreen> {
+  String _searchQuery = '';
+  TeamFilter _selectedFilter = TeamFilter.all;
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +78,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+          backgroundColor: AppColors.surface,
           title: Text(
             'Deactivate Team?',
             style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -80,12 +87,12 @@ class _TeamsScreenState extends State<TeamsScreen> {
             'Deactivating "${team.teamName}" will exclude them from the active judging session. Historical evaluations are preserved.',
             style: AppTextStyles.bodyMedium,
           ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Cancel'),
@@ -95,7 +102,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
                 backgroundColor: AppColors.warning,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                minimumSize: const Size(0, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: AppDimensions.borderRadiusSmall,
                 ),
@@ -119,6 +127,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Delete Team?',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -127,12 +136,12 @@ class _TeamsScreenState extends State<TeamsScreen> {
           'Are you sure you want to permanently delete ${team.teamName}?\n\nThis action cannot be undone.',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
@@ -142,7 +151,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
@@ -180,6 +190,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Cannot Delete Team',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -188,12 +199,12 @@ class _TeamsScreenState extends State<TeamsScreen> {
           'Judging records already exist for "${team.teamName}". You can deactivate the team to preserve evaluation history, or force delete to erase all its judging sessions.',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
@@ -203,7 +214,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.warning,
                 side: const BorderSide(color: AppColors.warning),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
               ),
               onPressed: () {
@@ -217,7 +228,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
@@ -247,6 +259,21 @@ class _TeamsScreenState extends State<TeamsScreen> {
     );
   }
 
+  List<TeamEntity> _filterTeams(List<TeamEntity> teams) {
+    return teams.where((team) {
+      if (_selectedFilter == TeamFilter.active && !team.active) return false;
+      if (_selectedFilter == TeamFilter.inactive && team.active) return false;
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        final matchName = team.teamName.toLowerCase().contains(q);
+        final matchProject = team.projectName.toLowerCase().contains(q);
+        final matchIdea = team.idea?.toLowerCase().contains(q) ?? false;
+        return matchName || matchProject || matchIdea;
+      }
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -254,49 +281,53 @@ class _TeamsScreenState extends State<TeamsScreen> {
       appBar: const AppAppBar(
         title: 'Manage Teams',
       ),
-      body: BlocConsumer<TeamsCubit, TeamsState>(
-        listener: (context, state) {
-          if (state is TeamsLoaded && state.actionSuccessMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.actionSuccessMessage!),
-                backgroundColor: AppColors.success,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          } else if (state is TeamsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is TeamsLoading) {
-            return const LoadingIndicator(message: 'Loading teams...');
-          }
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundMeshGradient,
+        ),
+        child: BlocConsumer<TeamsCubit, TeamsState>(
+          listener: (context, state) {
+            if (state is TeamsLoaded && state.actionSuccessMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionSuccessMessage!),
+                  backgroundColor: AppColors.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } else if (state is TeamsError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is TeamsLoading) {
+              return const LoadingIndicator(message: 'Loading teams...');
+            }
 
-          if (state is TeamsError && state.message.isNotEmpty) {
-            return ErrorState(
-              message: state.message,
-              onRetry: () => context.read<TeamsCubit>().loadTeams(),
-            );
-          }
+            if (state is TeamsError && state.message.isNotEmpty) {
+              return ErrorState(
+                message: state.message,
+                onRetry: () => context.read<TeamsCubit>().loadTeams(),
+              );
+            }
 
-          if (state is TeamsLoaded) {
-            final teams = state.teams;
+            if (state is TeamsLoaded) {
+              final allTeams = state.teams;
+              final filteredTeams = _filterTeams(allTeams);
 
-            return RefreshIndicator(
-              onRefresh: () => context.read<TeamsCubit>().loadTeams(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: AppDimensions.screenPadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              return RefreshIndicator(
+                onRefresh: () => context.read<TeamsCubit>().loadTeams(),
+                color: AppColors.primaryBlue,
+                child: ListView(
+                  padding: AppDimensions.screenPadding,
                   children: [
+                    // Top Actions Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -308,9 +339,9 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                 'Participating Teams',
                                 style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy),
                               ),
-                              const SizedBox(height: AppDimensions.space4),
+                              const SizedBox(height: AppDimensions.space2),
                               Text(
-                                '${teams.length} total (${teams.where((t) => t.active).length} active)',
+                                '${allTeams.length} total (${allTeams.where((t) => t.active).length} active)',
                                 style: AppTextStyles.bodySmall,
                               ),
                             ],
@@ -320,15 +351,41 @@ class _TeamsScreenState extends State<TeamsScreen> {
                         PrimaryButton(
                           text: 'Add Team',
                           icon: Icons.add,
-                          width: 160,
-                          height: 42,
+                          width: 135,
+                          height: 40,
                           onPressed: _openAddTeamDialog,
                         ),
                       ],
                     ),
                     const SizedBox(height: AppDimensions.space16),
 
-                    if (teams.isEmpty)
+                    // 200+ Teams Scalability: Search & Filter Controls
+                    GlassSearchField(
+                      hintText: 'Search teams or projects...',
+                      onChanged: (val) {
+                        setState(() {
+                          _searchQuery = val.trim();
+                        });
+                      },
+                    ),
+                    const SizedBox(height: AppDimensions.space12),
+
+                    // Filter Chips Row
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip('All (${allTeams.length})', TeamFilter.all),
+                          const SizedBox(width: AppDimensions.space8),
+                          _buildFilterChip('Active (${allTeams.where((t) => t.active).length})', TeamFilter.active),
+                          const SizedBox(width: AppDimensions.space8),
+                          _buildFilterChip('Inactive (${allTeams.where((t) => !t.active).length})', TeamFilter.inactive),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.space16),
+
+                    if (allTeams.isEmpty)
                       EmptyState(
                         title: 'No teams added yet',
                         message: 'Add hackathon teams to establish the judging queue.',
@@ -336,18 +393,32 @@ class _TeamsScreenState extends State<TeamsScreen> {
                         actionText: 'Add First Team',
                         onAction: _openAddTeamDialog,
                       )
+                    else if (filteredTeams.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 32.0),
+                          child: Text(
+                            'No teams match "$_searchQuery"',
+                            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ),
+                      )
                     else
+                      // Efficient ListView for 200+ teams
                       ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: teams.length,
+                        itemCount: filteredTeams.length,
                         separatorBuilder: (_, __) => const SizedBox(height: AppDimensions.space12),
                         itemBuilder: (context, index) {
-                          final team = teams[index];
-                          final orderDisplay = (index + 1).toString().padLeft(2, '0');
+                          final team = filteredTeams[index];
+                          final originalIndex = allTeams.indexOf(team);
+                          final orderDisplay = (team.displayOrder > 0 ? team.displayOrder : originalIndex + 1)
+                              .toString()
+                              .padLeft(2, '0');
 
                           return GlassCard(
-                            padding: const EdgeInsets.all(AppDimensions.space16),
+                            padding: const EdgeInsets.all(AppDimensions.space14),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -357,7 +428,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                   height: 36,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: team.active ? AppColors.softBlue : AppColors.border,
+                                    color: team.active ? AppColors.softBlue : AppColors.borderLight,
                                     borderRadius: AppDimensions.borderRadiusSmall,
                                   ),
                                   child: Text(
@@ -392,7 +463,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: AppDimensions.space4),
+                                      const SizedBox(height: AppDimensions.space2),
                                       Text(
                                         team.projectName,
                                         style: AppTextStyles.bodyMedium.copyWith(
@@ -409,37 +480,38 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                                         ),
                                       ],
-                                      const SizedBox(height: AppDimensions.space12),
+                                      const SizedBox(height: AppDimensions.space10),
 
-                                      // Actions Row: Move Up/Down, Edit, Status
+                                      // Actions Row: Move Up/Down, Edit, Status, Delete
                                       Row(
                                         children: [
                                           // Reorder Controls
                                           IconButton(
                                             icon: const Icon(Icons.arrow_upward_rounded, size: 18),
-                                            color: index > 0 ? AppColors.primaryNavy : AppColors.border,
+                                            color: originalIndex > 0 ? AppColors.primaryNavy : AppColors.border,
                                             tooltip: 'Move Up',
                                             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                             padding: EdgeInsets.zero,
-                                            onPressed: index > 0 ? () => context.read<TeamsCubit>().moveTeamUp(index) : null,
+                                            onPressed: originalIndex > 0 ? () => context.read<TeamsCubit>().moveTeamUp(originalIndex) : null,
                                           ),
                                           IconButton(
                                             icon: const Icon(Icons.arrow_downward_rounded, size: 18),
-                                            color: index < teams.length - 1 ? AppColors.primaryNavy : AppColors.border,
+                                            color: originalIndex < allTeams.length - 1 ? AppColors.primaryNavy : AppColors.border,
                                             tooltip: 'Move Down',
                                             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                             padding: EdgeInsets.zero,
-                                            onPressed: index < teams.length - 1 ? () => context.read<TeamsCubit>().moveTeamDown(index) : null,
+                                            onPressed: originalIndex < allTeams.length - 1 ? () => context.read<TeamsCubit>().moveTeamDown(originalIndex) : null,
                                           ),
                                           const Spacer(),
 
                                           // Edit
                                           TextButton.icon(
-                                            icon: const Icon(Icons.edit_outlined, size: 16),
+                                            icon: const Icon(Icons.edit_outlined, size: 15),
                                             label: const Text('Edit'),
                                             style: TextButton.styleFrom(
                                               foregroundColor: AppColors.primaryNavy,
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              textStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () => _openEditTeamDialog(team),
                                           ),
@@ -448,7 +520,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                           TextButton(
                                             style: TextButton.styleFrom(
                                               foregroundColor: team.active ? AppColors.warning : AppColors.success,
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              textStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () => _confirmToggleStatus(team),
                                             child: Text(team.active ? 'Deactivate' : 'Activate'),
@@ -456,11 +529,12 @@ class _TeamsScreenState extends State<TeamsScreen> {
 
                                           // Delete
                                           TextButton.icon(
-                                            icon: const Icon(Icons.delete_outline_rounded, size: 16),
+                                            icon: const Icon(Icons.delete_outline_rounded, size: 15),
                                             label: const Text('Delete'),
                                             style: TextButton.styleFrom(
                                               foregroundColor: AppColors.error,
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              textStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () => _confirmDeleteTeam(team),
                                           ),
@@ -474,15 +548,39 @@ class _TeamsScreenState extends State<TeamsScreen> {
                           );
                         },
                       ),
+                    const SizedBox(height: AppDimensions.space32),
                   ],
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return const SizedBox.shrink();
-        },
+            return const SizedBox.shrink();
+          },
+        ),
       ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, TeamFilter filter) {
+    final isSelected = _selectedFilter == filter;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) {
+        setState(() {
+          _selectedFilter = filter;
+        });
+      },
+      selectedColor: AppColors.primaryBlue,
+      backgroundColor: AppColors.glassSurface,
+      labelStyle: AppTextStyles.bodySmall.copyWith(
+        color: isSelected ? Colors.white : AppColors.primaryNavy,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.primaryBlue : AppColors.borderLight,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
     );
   }
 }

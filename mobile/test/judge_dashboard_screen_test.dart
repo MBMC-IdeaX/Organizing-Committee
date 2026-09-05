@@ -77,6 +77,10 @@ void main() {
   ];
 
   testWidgets('JudgeDashboardScreen renders progress, next project card, and queue', (tester) async {
+    tester.view.physicalSize = const Size(1200, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     when(() => mockJudgeRepository.getDashboard()).thenAnswer((_) async => testDashboard);
     when(() => mockJudgeRepository.getTeams()).thenAnswer((_) async => testTeams);
 
@@ -105,7 +109,7 @@ void main() {
     expect(find.text('Next Project'), findsOneWidget);
     expect(find.text('Start Next Project'), findsOneWidget);
     expect(find.text('Team Alpha'), findsOneWidget);
-    expect(find.text('Team Beta'), findsOneWidget);
+    expect(find.text('Team Beta'), findsNWidgets(2));
 
     authCubit.close();
     judgeDashboardCubit.close();

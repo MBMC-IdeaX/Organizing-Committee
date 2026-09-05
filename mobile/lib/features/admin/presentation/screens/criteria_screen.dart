@@ -70,6 +70,7 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+          backgroundColor: AppColors.surface,
           title: Text(
             'Deactivate Criterion?',
             style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -78,12 +79,12 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
             'Deactivating "${criteria.name}" will exclude its points from the active judging rubric.',
             style: AppTextStyles.bodyMedium,
           ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Cancel'),
@@ -93,7 +94,8 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                 backgroundColor: AppColors.warning,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                minimumSize: const Size(0, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: AppDimensions.borderRadiusSmall,
                 ),
@@ -119,49 +121,52 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
       appBar: const AppAppBar(
         title: 'Judging Criteria',
       ),
-      body: BlocConsumer<CriteriaCubit, CriteriaState>(
-        listener: (context, state) {
-          if (state is CriteriaLoaded && state.actionSuccessMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.actionSuccessMessage!),
-                backgroundColor: AppColors.success,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          } else if (state is CriteriaError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is CriteriaLoading) {
-            return const LoadingIndicator(message: 'Loading criteria rubrics...');
-          }
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundMeshGradient,
+        ),
+        child: BlocConsumer<CriteriaCubit, CriteriaState>(
+          listener: (context, state) {
+            if (state is CriteriaLoaded && state.actionSuccessMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionSuccessMessage!),
+                  backgroundColor: AppColors.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } else if (state is CriteriaError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is CriteriaLoading) {
+              return const LoadingIndicator(message: 'Loading criteria rubrics...');
+            }
 
-          if (state is CriteriaError && state.message.isNotEmpty) {
-            return ErrorState(
-              message: state.message,
-              onRetry: () => context.read<CriteriaCubit>().loadCriteria(),
-            );
-          }
+            if (state is CriteriaError && state.message.isNotEmpty) {
+              return ErrorState(
+                message: state.message,
+                onRetry: () => context.read<CriteriaCubit>().loadCriteria(),
+              );
+            }
 
-          if (state is CriteriaLoaded) {
-            final criteriaList = state.criteria;
-            final totalScore = state.totalMaxScore;
+            if (state is CriteriaLoaded) {
+              final criteriaList = state.criteria;
+              final totalScore = state.totalMaxScore;
+              final activeCount = criteriaList.where((c) => c.active).length;
 
-            return RefreshIndicator(
-              onRefresh: () => context.read<CriteriaCubit>().loadCriteria(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: AppDimensions.screenPadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              return RefreshIndicator(
+                onRefresh: () => context.read<CriteriaCubit>().loadCriteria(),
+                color: AppColors.primaryBlue,
+                child: ListView(
+                  padding: AppDimensions.screenPadding,
                   children: [
                     // Total Max Score Preview Glass Banner
                     GlassCard(
@@ -173,30 +178,37 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(AppDimensions.space12),
+                            padding: const EdgeInsets.all(AppDimensions.space10),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: AppDimensions.borderRadiusMedium,
                             ),
-                            child: const Icon(Icons.analytics_outlined, color: Colors.white, size: 28),
+                            child: const Icon(Icons.analytics_outlined, color: Colors.white, size: 26),
                           ),
-                          const SizedBox(width: AppDimensions.space16),
+                          const SizedBox(width: AppDimensions.space14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Total Maximum Score',
-                                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
+                                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white70),
                                 ),
-                                const SizedBox(height: AppDimensions.space4),
+                                const SizedBox(height: AppDimensions.space2),
                                 Text(
                                   '$totalScore Points',
                                   style: AppTextStyles.headingMedium.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
                                 ),
-                                Text(
-                                  'Calculated from ${criteriaList.where((c) => c.active).length} active rubrics',
-                                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white60),
+                                const SizedBox(height: AppDimensions.space2),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.check_circle_outline_rounded, color: AppColors.accentCyan, size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$activeCount active criteria • Configuration valid',
+                                      style: AppTextStyles.caption.copyWith(color: Colors.white70),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -219,8 +231,8 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                         PrimaryButton(
                           text: 'Add Criterion',
                           icon: Icons.add,
-                          width: 175,
-                          height: 42,
+                          width: 150,
+                          height: 40,
                           onPressed: _openAddCriteriaDialog,
                         ),
                       ],
@@ -246,7 +258,7 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                           final orderDisplay = (index + 1).toString().padLeft(2, '0');
 
                           return GlassCard(
-                            padding: const EdgeInsets.all(AppDimensions.space16),
+                            padding: const EdgeInsets.all(AppDimensions.space14),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -256,7 +268,7 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                                   height: 36,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: crit.active ? AppColors.softBlue : AppColors.border,
+                                    color: crit.active ? AppColors.softBlue : AppColors.borderLight,
                                     borderRadius: AppDimensions.borderRadiusSmall,
                                   ),
                                   child: Text(
@@ -286,9 +298,9 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                                             ),
                                           ),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                             decoration: BoxDecoration(
-                                              color: crit.active ? AppColors.softBlue : AppColors.border,
+                                              color: crit.active ? AppColors.softBlue : AppColors.borderLight,
                                               borderRadius: AppDimensions.borderRadiusSmall,
                                             ),
                                             child: Text(
@@ -310,7 +322,7 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                                           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                                         ),
                                       ],
-                                      const SizedBox(height: AppDimensions.space12),
+                                      const SizedBox(height: AppDimensions.space10),
 
                                       // Actions Row: Move Up/Down, Edit, Status
                                       Row(
@@ -341,11 +353,12 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                                           const Spacer(),
 
                                           TextButton.icon(
-                                            icon: const Icon(Icons.edit_outlined, size: 16),
+                                            icon: const Icon(Icons.edit_outlined, size: 15),
                                             label: const Text('Edit'),
                                             style: TextButton.styleFrom(
                                               foregroundColor: AppColors.primaryNavy,
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              textStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () => _openEditCriteriaDialog(crit),
                                           ),
@@ -353,7 +366,8 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                                           TextButton(
                                             style: TextButton.styleFrom(
                                               foregroundColor: crit.active ? AppColors.warning : AppColors.success,
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              textStyle: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600),
                                             ),
                                             onPressed: () => _confirmToggleStatus(crit),
                                             child: Text(crit.active ? 'Deactivate' : 'Activate'),
@@ -368,14 +382,15 @@ class _CriteriaScreenState extends State<CriteriaScreen> {
                           );
                         },
                       ),
+                    const SizedBox(height: AppDimensions.space32),
                   ],
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return const SizedBox.shrink();
-        },
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

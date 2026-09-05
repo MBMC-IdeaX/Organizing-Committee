@@ -75,12 +75,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('IdeaX Admin Console'), findsOneWidget);
-      expect(find.text('Event Configuration'), findsOneWidget);
-      expect(find.text('ADMIN ROLE'), findsOneWidget);
-      expect(find.text('Judging Setup: Ready'), findsOneWidget);
-      expect(find.text('10 Active Teams configured'), findsOneWidget);
+      expect(find.text('Event Management & Judging Control'), findsOneWidget);
+      expect(find.text('ADMIN'), findsOneWidget);
+      expect(find.text('Judging Setup: READY'), findsOneWidget);
       expect(find.text('Manage Teams'), findsOneWidget);
-      expect(find.text('Manage Criteria Rubrics'), findsOneWidget);
+      expect(find.text('Manage Criteria'), findsOneWidget);
       expect(find.text('Manage Judges'), findsOneWidget);
     });
 

@@ -10,7 +10,8 @@ class SecondaryButton extends StatelessWidget {
   final IconData? icon;
   final double? width;
   final double height;
-
+  final Color? foregroundColor;
+  final Color? borderColor;
   final EdgeInsetsGeometry? padding;
 
   const SecondaryButton({
@@ -21,21 +22,26 @@ class SecondaryButton extends StatelessWidget {
     this.icon,
     this.width,
     this.height = AppDimensions.compactButtonHeight,
+    this.foregroundColor,
+    this.borderColor,
     this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
+    final fg = foregroundColor ?? AppColors.primaryNavy;
+    final bc = borderColor ?? AppColors.border;
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primaryNavy,
+          foregroundColor: fg,
           backgroundColor: AppColors.surface.withValues(alpha: 0.8),
-          side: const BorderSide(color: AppColors.border, width: 1.2),
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+          side: BorderSide(color: bc, width: 1.2),
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
@@ -45,24 +51,35 @@ class SecondaryButton extends StatelessWidget {
         ),
         child: isLoading
             ? const SizedBox(
-                width: 22,
-                height: 22,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                  strokeWidth: 2.2,
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
                 ),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 18, color: AppColors.primaryNavy),
-                    const SizedBox(width: AppDimensions.space8),
+                    Icon(icon, size: 18, color: fg),
+                    const SizedBox(width: AppDimensions.space6),
                   ],
-                  Text(text, style: AppTextStyles.buttonSecondary),
+                  Flexible(
+                    child: Text(
+                      text,
+                      style: AppTextStyles.buttonSecondary.copyWith(color: fg),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
                 ],
               ),
       ),
     );
   }
 }
+
+/// Design system alias
+typedef GlassOutlinedButton = SecondaryButton;

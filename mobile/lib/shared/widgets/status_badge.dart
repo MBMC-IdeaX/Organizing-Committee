@@ -50,15 +50,21 @@ class StatusBadge extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: AppDimensions.borderRadiusSmall,
       ),
       child: Text(
         label,
-        style: AppTextStyles.badge.copyWith(color: textColor),
+        style: AppTextStyles.badge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
 }
+
+/// Design system alias
+typedef GlassStatusBadge = StatusBadge;

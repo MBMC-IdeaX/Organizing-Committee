@@ -7,6 +7,7 @@ import '../../../../app/theme/app_text_styles.dart';
 import '../../../../shared/widgets/app_app_bar.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/glass_search_field.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../domain/entities/ranking_result_entity.dart';
 import '../../domain/entities/results_summary_entity.dart';
@@ -21,10 +22,20 @@ class ResultsDashboardScreen extends StatefulWidget {
 }
 
 class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
     context.read<ResultsDashboardCubit>().loadResultsDashboard();
+  }
+
+  List<RankingResultEntity> _filterRankings(List<RankingResultEntity> ranking) {
+    if (_searchQuery.isEmpty) return ranking;
+    final q = _searchQuery.toLowerCase();
+    return ranking.where((r) {
+      return r.teamName.toLowerCase().contains(q) || r.projectName.toLowerCase().contains(q);
+    }).toList();
   }
 
   @override
@@ -34,29 +45,34 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
       appBar: const AppAppBar(
         title: 'Results & Rankings',
       ),
-      body: BlocBuilder<ResultsDashboardCubit, ResultsDashboardState>(
-        builder: (context, state) {
-          if (state is ResultsDashboardLoading) {
-            return const LoadingIndicator(message: 'Calculating scores and standings...');
-          }
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundMeshGradient,
+        ),
+        child: BlocBuilder<ResultsDashboardCubit, ResultsDashboardState>(
+          builder: (context, state) {
+            if (state is ResultsDashboardLoading) {
+              return const LoadingIndicator(message: 'Calculating scores and standings...');
+            }
 
-          if (state is ResultsDashboardError) {
-            return ErrorState(
-              message: state.message,
-              onRetry: () => context.read<ResultsDashboardCubit>().loadResultsDashboard(),
-            );
-          }
+            if (state is ResultsDashboardError) {
+              return ErrorState(
+                message: state.message,
+                onRetry: () => context.read<ResultsDashboardCubit>().loadResultsDashboard(),
+              );
+            }
 
-          if (state is ResultsDashboardNotReady) {
-            return _buildIncompleteState(state.summary);
-          }
+            if (state is ResultsDashboardNotReady) {
+              return _buildIncompleteState(state.summary);
+            }
 
-          if (state is ResultsDashboardLoaded) {
-            return _buildCompleteState(state.summary, state.ranking);
-          }
+            if (state is ResultsDashboardLoaded) {
+              return _buildCompleteState(state.summary, state.ranking);
+            }
 
-          return const SizedBox.shrink();
-        },
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -69,140 +85,138 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
 
     return RefreshIndicator(
       onRefresh: () => context.read<ResultsDashboardCubit>().loadResultsDashboard(),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+      color: AppColors.primaryBlue,
+      child: ListView(
         padding: AppDimensions.screenPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status Header Card
-            GlassCard(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.pending_actions_rounded, color: AppColors.warning, size: 28),
-                      const SizedBox(width: AppDimensions.space12),
-                      Expanded(
-                        child: Text(
-                          'Results are not ready yet',
-                          style: AppTextStyles.headingSmall.copyWith(
-                            color: const Color(0xFF78350F),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppDimensions.space16),
-                  Text(
-                    'All judge evaluations must be completed before final rankings can be generated.',
-                    style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF92400E)),
-                  ),
-                ],
-              ),
+        children: [
+          // Status Header Card
+          GlassCard(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const SizedBox(height: AppDimensions.space24),
-
-            // Progress Indicators
-            Text('Evaluation Progress', style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy)),
-            const SizedBox(height: AppDimensions.space12),
-            GlassCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Completed Status',
-                        style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        '${summary.completedEvaluations} / ${summary.totalRequiredEvaluations} (${summary.judgingCompletionPercentage.toStringAsFixed(1)}%)',
-                        style: AppTextStyles.bodyLarge.copyWith(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.pending_actions_rounded, color: AppColors.warning, size: 26),
+                    const SizedBox(width: AppDimensions.space10),
+                    Expanded(
+                      child: Text(
+                        'Results are not ready yet',
+                        style: AppTextStyles.headingSmall.copyWith(
+                          color: const Color(0xFF78350F),
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primaryBlue,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppDimensions.space16),
-                  ClipRRect(
-                    borderRadius: AppDimensions.borderRadiusSmall,
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 12,
-                      backgroundColor: AppColors.softBlue,
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
                     ),
-                  ),
-                  const SizedBox(height: AppDimensions.space16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildSimpleStat(
-                          title: 'Active Teams',
-                          value: summary.activeTeams.toString(),
-                        ),
-                      ),
-                      Container(width: 1, height: 40, color: AppColors.border),
-                      Expanded(
-                        child: _buildSimpleStat(
-                          title: 'Active Judges',
-                          value: summary.activeJudges.toString(),
-                        ),
-                      ),
-                      Container(width: 1, height: 40, color: AppColors.border),
-                      Expanded(
-                        child: _buildSimpleStat(
-                          title: 'Missing Ballots',
-                          value: remaining.toString(),
-                          valueColor: AppColors.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.space12),
+                Text(
+                  'All judge evaluations must be completed before final rankings can be generated.',
+                  style: AppTextStyles.bodyMedium.copyWith(color: const Color(0xFF92400E)),
+                ),
+              ],
             ),
-            const SizedBox(height: AppDimensions.space24),
+          ),
+          const SizedBox(height: AppDimensions.space20),
 
-            // Pull to refresh call-to-action
-            Center(
-              child: Column(
-                children: [
-                  const Icon(Icons.sync_rounded, color: AppColors.textSecondary, size: 24),
-                  const SizedBox(height: AppDimensions.space8),
-                  Text(
-                    'Pull down to refresh standing sheets',
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: AppDimensions.space16),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      side: const BorderSide(color: AppColors.primaryBlue),
-                      shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
+          // Progress Indicators
+          Text('Judging Progress', style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy)),
+          const SizedBox(height: AppDimensions.space12),
+          GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${summary.completedEvaluations} / ${summary.totalRequiredEvaluations} Evaluations',
+                      style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
                     ),
-                    onPressed: () => context.read<ResultsDashboardCubit>().loadResultsDashboard(),
-                    icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryBlue),
-                    label: Text(
-                      'Refresh Now',
-                      style: AppTextStyles.buttonSecondary.copyWith(color: AppColors.primaryBlue),
+                    Text(
+                      '${summary.judgingCompletionPercentage.toStringAsFixed(1)}%',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryBlue,
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.space12),
+                ClipRRect(
+                  borderRadius: AppDimensions.borderRadiusSmall,
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 10,
+                    backgroundColor: AppColors.softBlue,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryBlue),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: AppDimensions.space16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSimpleStat(
+                        title: 'Active Teams',
+                        value: summary.activeTeams.toString(),
+                      ),
+                    ),
+                    Container(width: 1, height: 36, color: AppColors.border),
+                    Expanded(
+                      child: _buildSimpleStat(
+                        title: 'Active Judges',
+                        value: summary.activeJudges.toString(),
+                      ),
+                    ),
+                    Container(width: 1, height: 36, color: AppColors.border),
+                    Expanded(
+                      child: _buildSimpleStat(
+                        title: 'Missing Ballots',
+                        value: remaining.toString(),
+                        valueColor: AppColors.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppDimensions.space24),
+
+          // Refresh call-to-action
+          Center(
+            child: Column(
+              children: [
+                const Icon(Icons.sync_rounded, color: AppColors.textSecondary, size: 22),
+                const SizedBox(height: AppDimensions.space6),
+                Text(
+                  'Pull down or tap below to refresh standing sheets',
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: AppDimensions.space12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    side: const BorderSide(color: AppColors.primaryBlue),
+                    shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
+                  ),
+                  onPressed: () => context.read<ResultsDashboardCubit>().loadResultsDashboard(),
+                  icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryBlue, size: 18),
+                  label: Text(
+                    'Refresh Now',
+                    style: AppTextStyles.buttonSecondary.copyWith(color: AppColors.primaryBlue),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppDimensions.space32),
+        ],
       ),
     );
   }
@@ -217,7 +231,7 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: AppDimensions.space4),
+        const SizedBox(height: AppDimensions.space2),
         Text(
           title,
           style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
@@ -232,110 +246,137 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
     RankingResultEntity? silver = ranking.length > 1 ? ranking.firstWhere((r) => r.rank == 2, orElse: () => ranking[1]) : null;
     RankingResultEntity? bronze = ranking.length > 2 ? ranking.firstWhere((r) => r.rank == 3, orElse: () => ranking[2]) : null;
 
-    // Handle exact ties on podium or edge-cases
     if (gold != null && silver != null && gold.teamId == silver.teamId) {
-      // In case first and second have rank 1 due to tie, we re-evaluate
       final sortedRanks = List<RankingResultEntity>.from(ranking);
       gold = sortedRanks[0];
       silver = sortedRanks.length > 1 ? sortedRanks[1] : null;
       bronze = sortedRanks.length > 2 ? sortedRanks[2] : null;
     }
 
+    final filteredRanking = _filterRankings(ranking);
+
     return RefreshIndicator(
       onRefresh: () => context.read<ResultsDashboardCubit>().loadResultsDashboard(),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+      color: AppColors.primaryBlue,
+      child: ListView(
         padding: AppDimensions.screenPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status Complete Header
-            GlassCard(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 28),
-                  const SizedBox(width: AppDimensions.space12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'JUDGING COMPLETE',
-                          style: AppTextStyles.headingSmall.copyWith(
-                            color: const Color(0xFF065F46),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 2.0),
-                        Text(
-                          'Final aggregate rankings computed across all active judges.',
-                          style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF047857)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+        children: [
+          // Status Complete Header
+          GlassCard(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const SizedBox(height: AppDimensions.space24),
-
-            // Podium Standing Visualizer
-            if (ranking.isNotEmpty) ...[
-              Text('Podium Standings', style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy)),
-              const SizedBox(height: AppDimensions.space16),
-              _buildPodium(gold: gold, silver: silver, bronze: bronze),
-              const SizedBox(height: 28.0),
-            ],
-
-            // Overall Leaderboard Standings List
-            Text('Overall Standings', style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy)),
-            const SizedBox(height: AppDimensions.space12),
-            GlassCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Table Header
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: const BoxDecoration(
-                      color: Color(0x08000000),
-                      border: Border(bottom: BorderSide(color: AppColors.border)),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 44,
-                          child: Text('Rank', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700)),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 26),
+                const SizedBox(width: AppDimensions.space10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'JUDGING COMPLETE',
+                        style: AppTextStyles.headingSmall.copyWith(
+                          color: const Color(0xFF065F46),
+                          fontWeight: FontWeight.w700,
                         ),
-                        Expanded(
-                          child: Text('Team / Project', style: AppTextStyles.bodySmall),
-                        ),
-                        SizedBox(
-                          width: 60,
-                          child: Text('Score', style: AppTextStyles.bodySmall, textAlign: TextAlign.right),
-                        ),
-                        SizedBox(
-                          width: 70,
-                          child: Text('Percent', style: AppTextStyles.bodySmall, textAlign: TextAlign.right),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 2.0),
+                      Text(
+                        'Final aggregate rankings computed across all active judges.',
+                        style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF047857)),
+                      ),
+                    ],
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppDimensions.space20),
 
-                  // Table Rows
+          // Podium Standing Visualizer
+          if (ranking.isNotEmpty) ...[
+            Text('Podium Standings', style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy)),
+            const SizedBox(height: AppDimensions.space14),
+            _buildPodium(gold: gold, silver: silver, bronze: bronze),
+            const SizedBox(height: 24.0),
+          ],
+
+          // 200+ Teams Scalability: Search field
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Overall Standings', style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy)),
+              Text('${ranking.length} Teams', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.space12),
+
+          GlassSearchField(
+            hintText: 'Search rankings by team or project...',
+            onChanged: (val) {
+              setState(() {
+                _searchQuery = val.trim();
+              });
+            },
+          ),
+          const SizedBox(height: AppDimensions.space12),
+
+          // Leaderboard Standings List
+          GlassCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Table Header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: const BoxDecoration(
+                    color: Color(0x08000000),
+                    border: Border(bottom: BorderSide(color: AppColors.border)),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 42,
+                        child: Text('Rank', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w700)),
+                      ),
+                      Expanded(
+                        child: Text('Team / Project', style: AppTextStyles.bodySmall),
+                      ),
+                      SizedBox(
+                        width: 60,
+                        child: Text('Score', style: AppTextStyles.bodySmall, textAlign: TextAlign.right),
+                      ),
+                      SizedBox(
+                        width: 68,
+                        child: Text('Percent', style: AppTextStyles.bodySmall, textAlign: TextAlign.right),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Table Rows
+                if (filteredRanking.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    child: Center(
+                      child: Text(
+                        'No teams match "$_searchQuery"',
+                        style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  )
+                else
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: ranking.length,
+                    itemCount: filteredRanking.length,
                     separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
                     itemBuilder: (context, index) {
-                      final row = ranking[index];
+                      final row = filteredRanking[index];
                       return InkWell(
                         onTap: () => Navigator.pushNamed(
                           context,
@@ -343,11 +384,11 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                           arguments: row.teamId,
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           child: Row(
                             children: [
                               SizedBox(
-                                width: 44,
+                                width: 42,
                                 child: Text(
                                   row.rank.toString(),
                                   style: AppTextStyles.bodyMedium.copyWith(
@@ -387,7 +428,7 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                                 ),
                               ),
                               SizedBox(
-                                width: 70,
+                                width: 68,
                                 child: Text(
                                   '${row.percentage.toStringAsFixed(2)}%',
                                   style: AppTextStyles.bodyMedium.copyWith(
@@ -403,12 +444,11 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                       );
                     },
                   ),
-                ],
-              ),
+              ],
             ),
-            const SizedBox(height: AppDimensions.space24),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppDimensions.space32),
+        ],
       ),
     );
   }
@@ -434,7 +474,7 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final podiumWidth = constraints.maxWidth;
-        final colWidth = (podiumWidth - 32) / 3;
+        final colWidth = (podiumWidth - 24) / 3;
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -446,12 +486,12 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                 entity: silver,
                 medal: '🥈',
                 label: '2nd Place',
-                height: 140,
+                height: 135,
                 width: colWidth,
                 color: const Color(0xFFF3F4F6),
                 borderColor: const Color(0xFFD1D5DB),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
             ] else
               SizedBox(width: colWidth),
 
@@ -461,13 +501,13 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                 entity: gold,
                 medal: '🥇',
                 label: 'Champion',
-                height: 180,
+                height: 175,
                 width: colWidth,
                 color: const Color(0xFFFEF3C7),
                 borderColor: const Color(0xFFFBBF24),
                 isChampion: true,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
             ] else
               SizedBox(width: colWidth),
 
@@ -508,7 +548,7 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
           // Medal Badge
           Text(
             medal,
-            style: TextStyle(fontSize: isChampion ? 38 : 30),
+            style: TextStyle(fontSize: isChampion ? 34 : 26),
           ),
           const SizedBox(height: 2.0),
           Text(
@@ -530,19 +570,19 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
             child: Container(
               height: height,
               width: width,
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.85),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(AppDimensions.radiusMedium),
                   topRight: Radius.circular(AppDimensions.radiusMedium),
                 ),
-                border: Border.all(color: borderColor, width: 2),
+                border: Border.all(color: borderColor, width: 1.8),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color(0x0D000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
+                    color: Color(0x0A000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
                   )
                 ],
               ),
@@ -559,7 +599,7 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: AppDimensions.space4),
+                  const SizedBox(height: AppDimensions.space2),
                   Text(
                     entity.projectName,
                     style: AppTextStyles.bodySmall.copyWith(
@@ -571,9 +611,9 @@ class _ResultsDashboardScreenState extends State<ResultsDashboardScreen> {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Colors.white.withValues(alpha: 0.75),
                       borderRadius: AppDimensions.borderRadiusSmall,
                     ),
                     child: Text(

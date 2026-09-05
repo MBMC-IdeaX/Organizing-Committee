@@ -68,6 +68,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+          backgroundColor: AppColors.surface,
           title: Text(
             'Deactivate Judge?',
             style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -76,12 +77,12 @@ class _JudgesScreenState extends State<JudgesScreen> {
             'Deactivating "${judge.username}" will immediately revoke their access and prevent them from logging in.',
             style: AppTextStyles.bodyMedium,
           ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
           actions: [
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.textSecondary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Cancel'),
@@ -91,7 +92,8 @@ class _JudgesScreenState extends State<JudgesScreen> {
                 backgroundColor: AppColors.warning,
                 foregroundColor: Colors.white,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                minimumSize: const Size(0, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: AppDimensions.borderRadiusSmall,
                 ),
@@ -115,6 +117,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Delete Judge?',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -123,12 +126,12 @@ class _JudgesScreenState extends State<JudgesScreen> {
           'Are you sure you want to permanently delete ${judge.username}?\n\nThis action cannot be undone.',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
@@ -138,7 +141,8 @@ class _JudgesScreenState extends State<JudgesScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
@@ -176,6 +180,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Cannot Delete Judge',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -184,12 +189,12 @@ class _JudgesScreenState extends State<JudgesScreen> {
           'This judge (${judge.username}) has evaluation history. You can deactivate the account to revoke access, or force delete to erase all submitted evaluations.',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
@@ -199,7 +204,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.warning,
                 side: const BorderSide(color: AppColors.warning),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
               ),
               onPressed: () {
@@ -213,7 +218,8 @@ class _JudgesScreenState extends State<JudgesScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
@@ -250,48 +256,50 @@ class _JudgesScreenState extends State<JudgesScreen> {
       appBar: const AppAppBar(
         title: 'Manage Judges',
       ),
-      body: BlocConsumer<JudgesCubit, JudgesState>(
-        listener: (context, state) {
-          if (state is JudgesLoaded && state.actionSuccessMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.actionSuccessMessage!),
-                backgroundColor: AppColors.success,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          } else if (state is JudgesError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is JudgesLoading) {
-            return const LoadingIndicator(message: 'Loading judge accounts...');
-          }
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundMeshGradient,
+        ),
+        child: BlocConsumer<JudgesCubit, JudgesState>(
+          listener: (context, state) {
+            if (state is JudgesLoaded && state.actionSuccessMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionSuccessMessage!),
+                  backgroundColor: AppColors.success,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            } else if (state is JudgesError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is JudgesLoading) {
+              return const LoadingIndicator(message: 'Loading judge accounts...');
+            }
 
-          if (state is JudgesError && state.message.isNotEmpty) {
-            return ErrorState(
-              message: state.message,
-              onRetry: () => context.read<JudgesCubit>().loadJudges(),
-            );
-          }
+            if (state is JudgesError && state.message.isNotEmpty) {
+              return ErrorState(
+                message: state.message,
+                onRetry: () => context.read<JudgesCubit>().loadJudges(),
+              );
+            }
 
-          if (state is JudgesLoaded) {
-            final judges = state.judges;
+            if (state is JudgesLoaded) {
+              final judges = state.judges;
 
-            return RefreshIndicator(
-              onRefresh: () => context.read<JudgesCubit>().loadJudges(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: AppDimensions.screenPadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              return RefreshIndicator(
+                onRefresh: () => context.read<JudgesCubit>().loadJudges(),
+                color: AppColors.primaryBlue,
+                child: ListView(
+                  padding: AppDimensions.screenPadding,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -304,7 +312,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
                                 'Judge Accounts',
                                 style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy),
                               ),
-                              const SizedBox(height: AppDimensions.space4),
+                              const SizedBox(height: AppDimensions.space2),
                               Text(
                                 '${judges.length} total (${judges.where((j) => j.active).length} active)',
                                 style: AppTextStyles.bodySmall,
@@ -316,8 +324,8 @@ class _JudgesScreenState extends State<JudgesScreen> {
                         PrimaryButton(
                           text: 'Create Judge',
                           icon: Icons.person_add_outlined,
-                          width: 175,
-                          height: 42,
+                          width: 145,
+                          height: 40,
                           onPressed: _openCreateJudgeDialog,
                         ),
                       ],
@@ -342,20 +350,20 @@ class _JudgesScreenState extends State<JudgesScreen> {
                           final judge = judges[index];
 
                           return GlassCard(
-                            padding: const EdgeInsets.all(AppDimensions.space16),
+                            padding: const EdgeInsets.all(AppDimensions.space14),
                             child: Row(
                               children: [
                                 // Judge Avatar
                                 CircleAvatar(
-                                  radius: 22,
-                                  backgroundColor: judge.active ? AppColors.softBlue : AppColors.border,
+                                  radius: 20,
+                                  backgroundColor: judge.active ? AppColors.softBlue : AppColors.borderLight,
                                   child: Icon(
                                     Icons.gavel_rounded,
                                     color: judge.active ? AppColors.primaryBlue : AppColors.textMuted,
-                                    size: 20,
+                                    size: 18,
                                   ),
                                 ),
-                                const SizedBox(width: AppDimensions.space16),
+                                const SizedBox(width: AppDimensions.space14),
 
                                 // Details
                                 Expanded(
@@ -379,9 +387,9 @@ class _JudgesScreenState extends State<JudgesScreen> {
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: AppDimensions.space4),
+                                      const SizedBox(height: AppDimensions.space2),
                                       Text(
-                                        'Role: Evaluator (JUDGE)',
+                                        'Evaluator (JUDGE)',
                                         style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                                       ),
                                     ],
@@ -392,7 +400,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
                                 Row(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.edit_outlined, size: 20),
+                                      icon: const Icon(Icons.edit_outlined, size: 18),
                                       color: AppColors.primaryNavy,
                                       tooltip: 'Edit / Reset Password',
                                       constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -402,7 +410,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
                                     IconButton(
                                       icon: Icon(
                                         judge.active ? Icons.toggle_on_rounded : Icons.toggle_off_rounded,
-                                        size: 28,
+                                        size: 26,
                                         color: judge.active ? AppColors.success : AppColors.textMuted,
                                       ),
                                       tooltip: judge.active ? 'Deactivate Judge' : 'Activate Judge',
@@ -411,7 +419,7 @@ class _JudgesScreenState extends State<JudgesScreen> {
                                       onPressed: () => _confirmToggleStatus(judge),
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
                                       color: AppColors.error,
                                       tooltip: 'Delete Judge',
                                       constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -425,14 +433,15 @@ class _JudgesScreenState extends State<JudgesScreen> {
                           );
                         },
                       ),
+                    const SizedBox(height: AppDimensions.space32),
                   ],
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          return const SizedBox.shrink();
-        },
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

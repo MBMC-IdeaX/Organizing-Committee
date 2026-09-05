@@ -15,6 +15,7 @@ class GlassCard extends StatelessWidget {
   final Color? surfaceColor;
   final Color? borderColor;
   final Gradient? gradient;
+  final List<BoxShadow>? boxShadow;
   final double blur;
   final VoidCallback? onTap;
 
@@ -29,6 +30,7 @@ class GlassCard extends StatelessWidget {
     this.surfaceColor,
     this.borderColor,
     this.gradient,
+    this.boxShadow,
     this.blur = AppDimensions.glassBlur,
     this.onTap,
   });
@@ -46,16 +48,10 @@ class GlassCard extends StatelessWidget {
         gradient: gradient,
         borderRadius: effectiveRadius,
         border: Border.all(
-          color: borderColor ?? AppColors.border,
+          color: borderColor ?? AppColors.borderLight,
           width: AppDimensions.glassBorderWidth,
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A0B1F4B), // Very subtle navy drop shadow
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          ),
-        ],
+        boxShadow: boxShadow ?? AppDimensions.glassShadow,
       ),
       child: child,
     );
@@ -68,15 +64,22 @@ class GlassCard extends StatelessWidget {
       ),
     );
 
-    if (margin != null) {
-      frostedCard = Padding(padding: margin!, child: frostedCard);
+    if (onTap != null) {
+      frostedCard = Material(
+        color: Colors.transparent,
+        borderRadius: effectiveRadius,
+        child: InkWell(
+          borderRadius: effectiveRadius,
+          onTap: onTap,
+          splashColor: AppColors.primaryBlue.withValues(alpha: 0.08),
+          highlightColor: AppColors.primaryBlue.withValues(alpha: 0.04),
+          child: frostedCard,
+        ),
+      );
     }
 
-    if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: frostedCard,
-      );
+    if (margin != null) {
+      frostedCard = Padding(padding: margin!, child: frostedCard);
     }
 
     return frostedCard;

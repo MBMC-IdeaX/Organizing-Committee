@@ -55,8 +55,8 @@ class JudgeCompletionScreen extends StatelessWidget {
 
                           // Success Icon with Glow Pill
                           Container(
-                            width: 80,
-                            height: 80,
+                            width: 76,
+                            height: 76,
                             decoration: BoxDecoration(
                               color: AppColors.success.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
@@ -64,7 +64,7 @@ class JudgeCompletionScreen extends StatelessWidget {
                             child: const Icon(
                               Icons.check_circle_rounded,
                               color: AppColors.success,
-                              size: 54,
+                              size: 50,
                             ),
                           ),
                           const SizedBox(height: AppDimensions.space20),
@@ -76,7 +76,7 @@ class JudgeCompletionScreen extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(height: AppDimensions.space8),
+                          const SizedBox(height: AppDimensions.space6),
                           Text(
                             'You have successfully submitted your scores for this project.',
                             textAlign: TextAlign.center,
@@ -84,7 +84,7 @@ class JudgeCompletionScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: AppDimensions.space24),
 
-                          // Summary Card
+                          // Summary Glass Card
                           GlassCard(
                             gradient: AppColors.successCardGradient,
                             child: Column(
@@ -133,6 +133,7 @@ class JudgeCompletionScreen extends StatelessWidget {
                                     PrimaryButton(
                                       text: 'Next Project (${nextTeam.teamName})',
                                       icon: Icons.arrow_forward_rounded,
+                                      height: 44,
                                       onPressed: () {
                                         Navigator.pushNamedAndRemoveUntil(
                                           context,
@@ -149,6 +150,7 @@ class JudgeCompletionScreen extends StatelessWidget {
                                     const SizedBox(height: AppDimensions.space12),
                                     SecondaryButton(
                                       text: 'View My Dashboard',
+                                      height: 42,
                                       onPressed: () {
                                         Navigator.pushNamedAndRemoveUntil(
                                           context,
@@ -164,6 +166,7 @@ class JudgeCompletionScreen extends StatelessWidget {
                               return PrimaryButton(
                                 text: 'Return to Dashboard',
                                 icon: Icons.dashboard_rounded,
+                                height: 44,
                                 onPressed: () {
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,

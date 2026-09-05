@@ -88,6 +88,7 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Row(
           children: [
             Container(
@@ -96,7 +97,7 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
                 color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
-              child: const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 24),
+              child: const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 22),
             ),
             const SizedBox(width: AppDimensions.space12),
             Expanded(
@@ -119,9 +120,9 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: AppColors.background,
                 borderRadius: AppDimensions.borderRadiusSmall,
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: AppColors.borderLight),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,12 +140,12 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
             ),
           ],
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Cancel'),
@@ -154,8 +155,8 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              minimumSize: const Size(0, 40),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -218,6 +219,7 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+      backgroundColor: AppColors.surface,
       title: Row(
         children: [
           Container(
@@ -302,9 +304,9 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.background,
                   borderRadius: AppDimensions.borderRadiusSmall,
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,12 +392,12 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
           ),
         ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+      actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
       actions: [
         TextButton(
           style: TextButton.styleFrom(
             foregroundColor: AppColors.textSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           ),
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
           child: const Text('Cancel'),
@@ -405,8 +407,8 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
             backgroundColor: AppColors.error,
             foregroundColor: Colors.white,
             elevation: 0,
-            minimumSize: const Size(0, 40),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            minimumSize: const Size(0, 38),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             shape: RoundedRectangleBorder(
               borderRadius: AppDimensions.borderRadiusSmall,
             ),

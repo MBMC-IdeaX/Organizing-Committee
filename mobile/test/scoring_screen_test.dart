@@ -84,8 +84,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Running Total Score'), findsOneWidget);
-    expect(find.text('15 / 20 Points'), findsOneWidget);
+    expect(find.text('Current Total Score'), findsOneWidget);
+    expect(find.text('15 / 20'), findsOneWidget);
     expect(find.text('Team Alpha'), findsOneWidget);
     expect(find.text('01  Innovation'), findsOneWidget);
     expect(find.text('Save Draft'), findsOneWidget);
@@ -95,7 +95,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
 
-    expect(find.text('16 / 20 Points'), findsOneWidget);
+    expect(find.text('16 / 20'), findsOneWidget);
 
     judgingCubit.close();
   });
@@ -129,19 +129,19 @@ void main() {
     await tester.enterText(scoreTextField, '18');
     await tester.pumpAndSettle();
 
-    expect(find.text('18 / 20 Points'), findsOneWidget);
+    expect(find.text('18 / 20'), findsOneWidget);
 
     // Enter score '0'
     await tester.enterText(scoreTextField, '0');
     await tester.pumpAndSettle();
 
-    expect(find.text('0 / 20 Points'), findsOneWidget);
+    expect(find.text('0 / 20'), findsOneWidget);
 
     // Enter score exceeding maxScore (e.g. '25') -> should clamp to 20
     await tester.enterText(scoreTextField, '25');
     await tester.pumpAndSettle();
 
-    expect(find.text('20 / 20 Points'), findsOneWidget);
+    expect(find.text('20 / 20'), findsOneWidget);
 
     judgingCubit.close();
   });

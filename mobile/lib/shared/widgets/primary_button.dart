@@ -10,7 +10,8 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
   final double? width;
   final double height;
-
+  final Color? backgroundColor;
+  final Color? foregroundColor;
   final EdgeInsetsGeometry? padding;
 
   const PrimaryButton({
@@ -21,20 +22,25 @@ class PrimaryButton extends StatelessWidget {
     this.icon,
     this.width,
     this.height = AppDimensions.buttonHeight,
+    this.backgroundColor,
+    this.foregroundColor,
     this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bg = backgroundColor ?? AppColors.primaryBlue;
+    final fg = foregroundColor ?? AppColors.textOnPrimary;
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryBlue,
-          foregroundColor: AppColors.textOnPrimary,
-          disabledBackgroundColor: AppColors.primaryBlue.withValues(alpha: 0.5),
+          backgroundColor: bg,
+          foregroundColor: fg,
+          disabledBackgroundColor: bg.withValues(alpha: 0.5),
           padding: padding ?? const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -44,12 +50,12 @@ class PrimaryButton extends StatelessWidget {
           elevation: 0,
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
+            ? SizedBox(
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.textOnPrimary),
+                  strokeWidth: 2.2,
+                  valueColor: AlwaysStoppedAnimation<Color>(fg),
                 ),
               )
             : Row(
@@ -57,13 +63,13 @@ class PrimaryButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 18, color: AppColors.textOnPrimary),
+                    Icon(icon, size: 18, color: fg),
                     const SizedBox(width: 6.0),
                   ],
                   Flexible(
                     child: Text(
                       text,
-                      style: AppTextStyles.button,
+                      style: AppTextStyles.button.copyWith(color: fg),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -74,3 +80,6 @@ class PrimaryButton extends StatelessWidget {
     );
   }
 }
+
+/// Design system alias
+typedef GlassButton = PrimaryButton;

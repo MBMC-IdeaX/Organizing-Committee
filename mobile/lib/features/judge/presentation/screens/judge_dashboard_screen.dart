@@ -8,6 +8,7 @@ import '../../../../shared/widgets/app_app_bar.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../../shared/widgets/glass_search_field.dart';
 import '../../../../shared/widgets/loading_indicator.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../../../../shared/widgets/status_badge.dart';
@@ -17,6 +18,8 @@ import '../../domain/entities/judge_team_entity.dart';
 import '../cubit/judge_dashboard_cubit.dart';
 import '../cubit/judge_dashboard_state.dart';
 
+enum JudgeQueueFilter { all, notStarted, inProgress, completed }
+
 class JudgeDashboardScreen extends StatefulWidget {
   const JudgeDashboardScreen({super.key});
 
@@ -25,6 +28,9 @@ class JudgeDashboardScreen extends StatefulWidget {
 }
 
 class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
+  String _searchQuery = '';
+  JudgeQueueFilter _selectedFilter = JudgeQueueFilter.all;
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +42,7 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusLarge),
+        backgroundColor: AppColors.surface,
         title: Text(
           'Sign Out?',
           style: AppTextStyles.headingLarge.copyWith(color: AppColors.primaryNavy),
@@ -44,12 +51,12 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
           'Are you sure you want to log out of the Judge Console?',
           style: AppTextStyles.bodyMedium,
         ),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
@@ -59,7 +66,8 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              minimumSize: const Size(0, 38),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: AppDimensions.borderRadiusSmall,
               ),
@@ -73,6 +81,23 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
         ],
       ),
     );
+  }
+
+  List<JudgeTeamEntity> _filterTeams(List<JudgeTeamEntity> teams) {
+    return teams.where((team) {
+      if (_selectedFilter == JudgeQueueFilter.notStarted && (team.isInProgress || team.isCompleted)) return false;
+      if (_selectedFilter == JudgeQueueFilter.inProgress && !team.isInProgress) return false;
+      if (_selectedFilter == JudgeQueueFilter.completed && !team.isCompleted) return false;
+
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        final matchName = team.teamName.toLowerCase().contains(q);
+        final matchProject = team.projectName.toLowerCase().contains(q);
+        final matchIdea = team.idea?.toLowerCase().contains(q) ?? false;
+        return matchName || matchProject || matchIdea;
+      }
+      return true;
+    }).toList();
   }
 
   @override
@@ -114,9 +139,10 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
                 );
               } else if (state is JudgeDashboardLoaded) {
                 final dashboard = state.dashboard;
-                final teams = state.teams;
+                final allTeams = state.teams;
+                final filteredTeams = _filterTeams(allTeams);
 
-                if (teams.isEmpty) {
+                if (allTeams.isEmpty) {
                   return EmptyState(
                     title: 'No Active Projects',
                     message: 'There are currently no active teams configured for judging.',
@@ -144,7 +170,7 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
                         _buildNextProjectCard(dashboard.nextTeam!, dashboard.totalTeams)
                       else
                         _buildAllCompletedCard(),
-                      const SizedBox(height: AppDimensions.space24),
+                      const SizedBox(height: AppDimensions.space20),
 
                       // Section Title: Projects Queue
                       Row(
@@ -155,15 +181,54 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
                             style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy),
                           ),
                           Text(
-                            '${teams.length} Projects',
+                            '${allTeams.length} Projects',
                             style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
                       ),
                       const SizedBox(height: AppDimensions.space12),
 
+                      // 200+ Team Scalability: Search & Filter
+                      GlassSearchField(
+                        hintText: 'Search projects or teams...',
+                        onChanged: (val) {
+                          setState(() {
+                            _searchQuery = val.trim();
+                          });
+                        },
+                      ),
+                      const SizedBox(height: AppDimensions.space10),
+
+                      // Filter chips
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip('All (${allTeams.length})', JudgeQueueFilter.all),
+                            const SizedBox(width: AppDimensions.space8),
+                            _buildFilterChip('Not Started (${allTeams.where((t) => !t.isInProgress && !t.isCompleted).length})', JudgeQueueFilter.notStarted),
+                            const SizedBox(width: AppDimensions.space8),
+                            _buildFilterChip('In Progress (${allTeams.where((t) => t.isInProgress).length})', JudgeQueueFilter.inProgress),
+                            const SizedBox(width: AppDimensions.space8),
+                            _buildFilterChip('Completed (${allTeams.where((t) => t.isCompleted).length})', JudgeQueueFilter.completed),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.space14),
+
                       // Teams List
-                      ...teams.map((team) => _buildTeamCard(team)),
+                      if (filteredTeams.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24.0),
+                          child: Center(
+                            child: Text(
+                              'No projects match "$_searchQuery"',
+                              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ),
+                        )
+                      else
+                        ...filteredTeams.map((team) => _buildTeamCard(team)),
                       const SizedBox(height: AppDimensions.space32),
                     ],
                   ),
@@ -174,6 +239,29 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, JudgeQueueFilter filter) {
+    final isSelected = _selectedFilter == filter;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) {
+        setState(() {
+          _selectedFilter = filter;
+        });
+      },
+      selectedColor: AppColors.primaryBlue,
+      backgroundColor: AppColors.glassSurface,
+      labelStyle: AppTextStyles.bodySmall.copyWith(
+        color: isSelected ? Colors.white : AppColors.primaryNavy,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.primaryBlue : AppColors.borderLight,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: AppDimensions.borderRadiusSmall),
     );
   }
 
@@ -193,7 +281,7 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: AppDimensions.space4),
+                const SizedBox(height: AppDimensions.space2),
                 Text(
                   'Judge Evaluation Console',
                   style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
@@ -230,14 +318,14 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AppDimensions.space8),
+          const SizedBox(height: AppDimensions.space6),
           Text(
             '$completed / $total Projects Completed',
             style: AppTextStyles.headingSmall.copyWith(color: Colors.white),
           ),
-          const SizedBox(height: AppDimensions.space12),
+          const SizedBox(height: AppDimensions.space10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: total > 0 ? completed / total : 0,
               backgroundColor: Colors.white.withValues(alpha: 0.2),
@@ -261,7 +349,7 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
               Row(
                 children: [
                   const Icon(Icons.play_circle_fill_rounded, color: AppColors.primaryBlue, size: 20),
-                  const SizedBox(width: AppDimensions.space8),
+                  const SizedBox(width: AppDimensions.space6),
                   Text(
                     'Next Project',
                     style: AppTextStyles.labelLarge.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.w700),
@@ -274,18 +362,18 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AppDimensions.space12),
+          const SizedBox(height: AppDimensions.space10),
           Text(
             nextTeam.teamName,
             style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy),
           ),
-          const SizedBox(height: AppDimensions.space4),
+          const SizedBox(height: AppDimensions.space2),
           Text(
             nextTeam.projectName,
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue, fontWeight: FontWeight.w600),
           ),
           if (nextTeam.idea != null && nextTeam.idea!.isNotEmpty) ...[
-            const SizedBox(height: AppDimensions.space8),
+            const SizedBox(height: AppDimensions.space6),
             Text(
               nextTeam.idea!,
               maxLines: 2,
@@ -293,10 +381,11 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
               style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
             ),
           ],
-          const SizedBox(height: AppDimensions.space16),
+          const SizedBox(height: AppDimensions.space14),
           PrimaryButton(
             text: nextTeam.isInProgress ? 'Continue Scoring' : 'Start Next Project',
             icon: Icons.arrow_forward_rounded,
+            height: 42,
             onPressed: () => _openProjectDetails(nextTeam.id),
           ),
         ],
@@ -308,13 +397,13 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
     return GlassCard(
       child: Column(
         children: [
-          const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 48),
-          const SizedBox(height: AppDimensions.space12),
+          const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 44),
+          const SizedBox(height: AppDimensions.space10),
           Text(
             'All Projects Completed!',
             style: AppTextStyles.headingSmall.copyWith(color: AppColors.success),
           ),
-          const SizedBox(height: AppDimensions.space8),
+          const SizedBox(height: AppDimensions.space6),
           Text(
             'You have evaluated all active teams. Thank you for your contributions!',
             textAlign: TextAlign.center,
@@ -341,18 +430,19 @@ class _JudgeDashboardScreenState extends State<JudgeDashboardScreen> {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppDimensions.space12),
+      padding: const EdgeInsets.only(bottom: AppDimensions.space10),
       child: GlassCard(
         onTap: () => _openProjectDetails(team.id),
+        padding: const EdgeInsets.all(AppDimensions.space14),
         child: Row(
           children: [
             // Order Bubble
             Container(
-              width: 42,
-              height: 42,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
                 color: team.isCompleted ? AppColors.success.withValues(alpha: 0.15) : AppColors.softBlue,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
               child: Text(

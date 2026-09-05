@@ -15,7 +15,7 @@ void main() {
     test('AppColors contains correct brand colors', () {
       expect(AppColors.primaryNavy, const Color(0xFF0B1F4B));
       expect(AppColors.primaryBlue, const Color(0xFF2563EB));
-      expect(AppColors.background, const Color(0xFFF5F9FF));
+      expect(AppColors.background, const Color(0xFFF4F8FF));
     });
 
     test('AppDimensions contains standard spacing', () {

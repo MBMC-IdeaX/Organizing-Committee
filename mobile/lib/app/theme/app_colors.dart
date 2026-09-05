@@ -13,14 +13,17 @@ class AppColors {
   static const Color accentCyan = Color(0xFF06B6D4);
 
   // Background & Surfaces
-  static const Color background = Color(0xFFF5F9FF);
+  static const Color background = Color(0xFFF4F8FF);
+  static const Color backgroundSecondary = Color(0xFFEEF4FF);
   static const Color surface = Color(0xFFFFFFFF);
   
-  // Glassmorphism Values (60-80% opacity white with soft borders)
-  static const Color glassSurface = Color(0xCCFFFFFF); // ~80% opacity
+  // Glassmorphism Values (70-85% opacity white with soft borders)
+  static const Color glassSurface = Color(0xD9FFFFFF); // ~85% opacity
+  static const Color glassSurfaceSubtle = Color(0xB8FFFFFF); // ~72% opacity
   static const Color glassSurfaceLight = Color(0x99FFFFFF); // ~60% opacity
   static const Color border = Color(0xFFDCE6F5);
   static const Color borderLight = Color(0x80DCE6F5);
+  static const Color borderWhite = Color(0x99FFFFFF);
 
   // Typography
   static const Color textPrimary = Color(0xFF0F172A);
@@ -46,15 +49,15 @@ class AppColors {
   );
 
   static const LinearGradient backgroundMeshGradient = LinearGradient(
-    colors: [Color(0xFFF0F6FF), Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
+    colors: [Color(0xFFF4F8FF), Color(0xFFEEF4FF), Color(0xFFFFFFFF)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
   static const LinearGradient glassCardGradient = LinearGradient(
     colors: [
-      Color(0xE6FFFFFF),
-      Color(0xB3FFFFFF),
+      Color(0xEBFFFFFF),
+      Color(0xB8FFFFFF),
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -72,3 +75,6 @@ class AppColors {
     end: Alignment.bottomRight,
   );
 }
+
+/// Alias for design system parity
+typedef GlassColors = AppColors;

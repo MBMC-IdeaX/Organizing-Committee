@@ -96,7 +96,7 @@ class _AddEditCriteriaDialogState extends State<AddEditCriteriaDialog> {
                       style: AppTextStyles.headingSmall.copyWith(color: AppColors.primaryNavy),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                      icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 20),
                       onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -163,6 +163,7 @@ class _AddEditCriteriaDialogState extends State<AddEditCriteriaDialog> {
                     Expanded(
                       child: SecondaryButton(
                         text: 'Cancel',
+                        height: 40,
                         onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                       ),
                     ),
@@ -170,6 +171,7 @@ class _AddEditCriteriaDialogState extends State<AddEditCriteriaDialog> {
                     Expanded(
                       child: PrimaryButton(
                         text: isEditing ? 'Save Changes' : 'Create Criterion',
+                        height: 40,
                         isLoading: _isLoading,
                         onPressed: _handleSubmit,
                       ),

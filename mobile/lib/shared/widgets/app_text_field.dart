@@ -106,3 +106,6 @@ class _AppTextFieldState extends State<AppTextField> {
     );
   }
 }
+
+/// Design system alias
+typedef GlassTextField = AppTextField;

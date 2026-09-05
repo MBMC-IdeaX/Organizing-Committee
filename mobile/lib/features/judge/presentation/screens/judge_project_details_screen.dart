@@ -82,7 +82,7 @@ class _JudgeProjectDetailsScreenState extends State<JudgeProjectDetailsScreen> {
                             StatusBadge(label: badgeLabel, type: badgeType),
                           ],
                         ),
-                        const SizedBox(height: AppDimensions.space16),
+                        const SizedBox(height: AppDimensions.space14),
                         Text(
                           session.teamName,
                           style: AppTextStyles.headingMedium.copyWith(
@@ -121,7 +121,7 @@ class _JudgeProjectDetailsScreenState extends State<JudgeProjectDetailsScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppDimensions.space12),
+                        const SizedBox(height: AppDimensions.space10),
                         Text(
                           session.idea != null && session.idea!.isNotEmpty
                               ? session.idea!
@@ -157,7 +157,7 @@ class _JudgeProjectDetailsScreenState extends State<JudgeProjectDetailsScreen> {
                               ),
                             ],
                           ),
-                          const Icon(Icons.check_circle_rounded, color: AppColors.accentCyan, size: 36),
+                          const Icon(Icons.check_circle_rounded, color: AppColors.accentCyan, size: 32),
                         ],
                       ),
                     ),
@@ -170,6 +170,7 @@ class _JudgeProjectDetailsScreenState extends State<JudgeProjectDetailsScreen> {
                         ? 'View Evaluation'
                         : (session.isInProgress ? 'Continue Scoring' : 'Start Scoring'),
                     icon: session.isCompleted ? Icons.visibility_rounded : Icons.edit_note_rounded,
+                    height: 44,
                     onPressed: () {
                       final cubit = context.read<JudgingCubit>();
                       Navigator.pushNamed(
