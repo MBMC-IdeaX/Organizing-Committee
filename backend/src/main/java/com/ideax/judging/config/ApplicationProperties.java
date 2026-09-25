@@ -44,8 +44,8 @@ public class ApplicationProperties {
     }
 
     public static class Cors {
-        private List<String> allowedOrigins = List.of("http://localhost:3000", "http://localhost:8080", "http://localhost:5000");
-        private List<String> allowedOriginPatterns = List.of("http://localhost:*", "http://127.0.0.1:*", "http://localhost:[*]", "http://127.0.0.1:[*]");
+        private List<String> allowedOrigins = List.of("http://localhost:3000", "http://localhost:8080", "http://localhost:5000", "http://192.168.1.164:8080", "http://192.168.1.164:3000");
+        private List<String> allowedOriginPatterns = List.of("http://localhost:*", "http://127.0.0.1:*", "http://localhost:[*]", "http://127.0.0.1:[*]", "http://192.168.*:*");
         private List<String> allowedMethods = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
         private String allowedHeaders = "*";
         private boolean allowCredentials = true;

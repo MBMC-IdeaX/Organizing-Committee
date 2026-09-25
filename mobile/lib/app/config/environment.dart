@@ -18,6 +18,15 @@ class Environment {
     this.receiveTimeout = const Duration(seconds: 15),
   });
 
+  /// LAN IP address for multi-device testing over local Wi-Fi
+  static const String lanHost = '192.168.1.164';
+
+  /// LAN development environment for testing APK on real devices
+  static const Environment lan = Environment(
+    type: EnvironmentType.dev,
+    apiBaseUrl: 'http://$lanHost:8080/api/v1',
+  );
+
   /// Default development environment for Android Emulator (10.0.2.2)
   static const Environment dev = Environment(
     type: EnvironmentType.dev,
@@ -36,12 +45,26 @@ class Environment {
     apiBaseUrl: 'https://api.ideax.org/api/v1',
   );
 
-  /// Automatically resolves the correct local environment based on platform
+  /// Optional override via --dart-define=API_BASE_URL=http://...
+  static const String _customApiBaseUrl = String.fromEnvironment('API_BASE_URL');
+
+  /// Automatically resolves the correct environment based on platform
   static Environment get defaultEnvironment {
-    if (kIsWeb) {
-      return local; // Flutter Web uses localhost:8080
+    if (_customApiBaseUrl.isNotEmpty) {
+      return Environment(
+        type: EnvironmentType.dev,
+        apiBaseUrl: _customApiBaseUrl,
+      );
+    } else if (kIsWeb) {
+      // On web, connect to port 8080 on the host serving the web page (or fallback to lanHost)
+      final host = Uri.base.host.isNotEmpty ? Uri.base.host : lanHost;
+      return Environment(
+        type: EnvironmentType.dev,
+        apiBaseUrl: 'http://$host:8080/api/v1',
+      );
     } else if (defaultTargetPlatform == TargetPlatform.android) {
-      return dev; // Android Emulator uses 10.0.2.2:8080
+      // Default to LAN IP so APKs on physical devices connect to this computer's server
+      return lan;
     } else {
       return local; // Windows, macOS, iOS Simulator use localhost:8080
     }

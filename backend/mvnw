@@ -1,0 +1,8 @@
+#!/bin/sh
+# Maven wrapper redirect for macOS / Linux
+if command -v mvn >/dev/null 2>&1; then
+    exec mvn "$@"
+else
+    echo "Error: Maven (mvn) not found on PATH. Please install Maven." >&2
+    exit 1
+fi

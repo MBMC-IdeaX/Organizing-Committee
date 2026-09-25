@@ -70,7 +70,7 @@ class _ResetSystemDialogState extends State<ResetSystemDialog> {
 
   Future<void> _handleAuthorizeClick() async {
     if (_isLoading) return;
-    if (!_formKey.currentState!.validate()) return;
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (!_clearJudgings && !_clearJudges && !_clearTeams) {
       setState(() {

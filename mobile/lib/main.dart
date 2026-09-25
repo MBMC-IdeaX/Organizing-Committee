@@ -27,7 +27,7 @@ void main() async {
     ),
   );
 
-  // Initialize App Configuration (Platform-aware: Web/Desktop -> localhost, Android -> 10.0.2.2)
+  // Initialize App Configuration (Platform-aware: Web/Desktop -> localhost, Android -> LAN 192.168.1.164)
   AppConfig.initialize(environment: Environment.defaultEnvironment);
 
   // Initialize Core Services
